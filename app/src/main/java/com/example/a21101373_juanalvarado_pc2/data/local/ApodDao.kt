@@ -23,4 +23,7 @@ interface ApodDao {
 
     @Query("SELECT date FROM apods WHERE isFavorite = 1")
     suspend fun getFavoriteDates(): List<String>
+
+    @Query("SELECT COUNT(*) FROM apods")
+    suspend fun getApodCount(): Int
 }

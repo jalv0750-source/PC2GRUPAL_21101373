@@ -37,10 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.a21101373_juanalvarado_pc2.data.local.ApodEntity
 import com.example.a21101373_juanalvarado_pc2.ui.viewmodel.ApodViewModel
 
@@ -54,6 +56,7 @@ fun ApodListScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Diario Espacial - APOD") },
@@ -158,30 +161,63 @@ fun ApodItemCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (apod.mediaType.equals("video", ignoreCase = true)) {
+                val youtubeThumbnail = getYouTubeThumbnailUrl(apod.url)
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp),
+                        .height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    if (youtubeThumbnail != null) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(youtubeThumbnail)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = apod.title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.45f),
+                            modifier = Modifier.fillMaxSize()
+                        ) {}
+                    } else {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.fillMaxSize()
+                        ) {}
+                    }
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.PlayCircleOutline,
                             contentDescription = "Video",
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.size(56.dp),
+                            tint = Color.White
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Contenido en video",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = "Contenido en video",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             } else {
                 AsyncImage(
-                    model = apod.url,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(apod.url)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = apod.title,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -222,5 +258,17 @@ fun ApodItemCard(
                 }
             }
         }
+    }
+}
+
+fun getYouTubeThumbnailUrl(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    val regex = "(?<=embed/|v/|vi/|v=|=v|youtu\\.be/)[^#&?]*".toRegex()
+    val matchResult = regex.find(url)
+    val videoId = matchResult?.value
+    return if (!videoId.isNullOrBlank()) {
+        "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
+    } else {
+        null
     }
 }

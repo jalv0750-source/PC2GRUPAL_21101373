@@ -11,4 +11,17 @@ interface NasaApiService {
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String
     ): List<ApodResponse>
+
+    @GET("planetary/apod")
+    suspend fun getApodImagesCount(
+        @Query("api_key") apiKey: String,
+        @Query("count") count: Int = 7
+    ): List<ApodResponse>
+
+    @GET("neo/rest/v1/feed")
+    suspend fun getAsteroidFeed(
+        @Query("api_key") apiKey: String,
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String
+    ): NeoFeedResponse
 }

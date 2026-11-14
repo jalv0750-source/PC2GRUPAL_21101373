@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ApodUiState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val apods: List<ApodEntity> = emptyList(),
     val favorites: List<ApodEntity> = emptyList()
@@ -53,10 +53,16 @@ class ApodViewModel(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val result = repository.fetchApodsFromApi()
             result.onFailure { error ->
+                val isOffline = error is java.net.UnknownHostException ||
+                        error is java.net.ConnectException ||
+                        error is java.net.SocketTimeoutException ||
+                        error.cause is java.net.UnknownHostException ||
+                        error.cause is java.net.ConnectException
+
                 _uiState.update { currentState ->
                     currentState.copy(
                         isLoading = false,
-                        errorMessage = "Error de conexión/red. Mostrando datos guardados localmente."
+                        errorMessage = if (isOffline) "Sin conexión a internet. Mostrando contenido almacenado localmente." else null
                     )
                 }
             }.onSuccess {

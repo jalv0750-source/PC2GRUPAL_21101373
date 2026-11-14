@@ -9,14 +9,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import com.example.a21101373_juanalvarado_pc2.data.local.AppDatabase
 import com.example.a21101373_juanalvarado_pc2.data.remote.RetrofitClient
 import com.example.a21101373_juanalvarado_pc2.data.repository.ApodRepository
-import com.example.a21101373_juanalvarado_pc2.ui.navigation.ApodNavGraph
+import com.example.a21101373_juanalvarado_pc2.data.repository.AsteroidRepository
+import com.example.a21101373_juanalvarado_pc2.ui.navigation.MainScreen
 import com.example.a21101373_juanalvarado_pc2.ui.theme._21101373_JuanAlvarado_PC2Theme
 import com.example.a21101373_juanalvarado_pc2.ui.viewmodel.ApodViewModel
 import com.example.a21101373_juanalvarado_pc2.ui.viewmodel.ApodViewModelFactory
+import com.example.a21101373_juanalvarado_pc2.ui.viewmodel.AsteroidViewModel
+import com.example.a21101373_juanalvarado_pc2.ui.viewmodel.AsteroidViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,8 +26,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val database = AppDatabase.getDatabase(applicationContext)
-        val repository = ApodRepository(
+        val apodRepository = ApodRepository(
             apodDao = database.apodDao(),
+            nasaApiService = RetrofitClient.nasaApiService
+        )
+        val asteroidRepository = AsteroidRepository(
+            asteroidDao = database.asteroidDao(),
             nasaApiService = RetrofitClient.nasaApiService
         )
 
@@ -35,13 +41,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    val viewModel: ApodViewModel = viewModel(
-                        factory = ApodViewModelFactory(repository)
+                    val apodViewModel: ApodViewModel = viewModel(
+                        factory = ApodViewModelFactory(apodRepository)
                     )
-                    ApodNavGraph(
-                        navController = navController,
-                        viewModel = viewModel
+                    val asteroidViewModel: AsteroidViewModel = viewModel(
+                        factory = AsteroidViewModelFactory(asteroidRepository)
+                    )
+                    MainScreen(
+                        apodViewModel = apodViewModel,
+                        asteroidViewModel = asteroidViewModel
                     )
                 }
             }
