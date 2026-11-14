@@ -5,7 +5,9 @@ import com.example.a21101373_juanalvarado_pc2.data.local.ApodDao
 import com.example.a21101373_juanalvarado_pc2.data.local.ApodEntity
 import com.example.a21101373_juanalvarado_pc2.data.remote.NasaApiService
 import com.example.a21101373_juanalvarado_pc2.data.remote.toEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -19,8 +21,8 @@ class ApodRepository(
 
     val favoriteApods: Flow<List<ApodEntity>> = apodDao.getFavoriteApods()
 
-    suspend fun fetchApodsFromApi(): Result<Unit> {
-        return try {
+    suspend fun fetchApodsFromApi(): Result<Unit> = withContext(Dispatchers.IO) {
+        return@withContext try {
             val (startDate, endDate) = calculateLast7DaysRange()
             val apiKey = BuildConfig.NASA_API_KEY.ifBlank { "DEMO_KEY" }
 
@@ -51,7 +53,7 @@ class ApodRepository(
         }
     }
 
-    suspend fun updateFavoriteStatus(date: String, isFavorite: Boolean) {
+    suspend fun updateFavoriteStatus(date: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         apodDao.updateFavoriteStatus(date, isFavorite)
     }
 

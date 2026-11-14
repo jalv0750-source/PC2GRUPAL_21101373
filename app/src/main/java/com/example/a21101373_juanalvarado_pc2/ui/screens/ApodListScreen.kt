@@ -54,6 +54,7 @@ fun ApodListScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Diario Espacial - APOD") },

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ApodUiState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val apods: List<ApodEntity> = emptyList(),
     val favorites: List<ApodEntity> = emptyList()
